@@ -10,22 +10,22 @@ module.exports = function (cacheDir) {
   
   return pull(
     glob(path.join(cacheDir, '*', '.cache.json')),
-    pfs.isFile(),
     pfs.readFile(),
     pull.map(function (data) {
-      return JSON.parse(data)
+      try { return JSON.parse(data) } catch (_) { }
     }),
+    pull.filter(Boolean),
     pull.flatMap(function (pkg) {
       var depns = []
       var versions = pkg.versions
       for(var version in versions) {
-        var deps = versions[version].dependencies
         var tests = versions[version].scripts
         tests = !!(tests && tests.test)
+        var deps = versions[version].dependencies
         for(var m in deps)
           depns.push([
-            m, deps[m], pkg.name,
-            version, {
+            m, deps[m], pkg.name, version,
+            {
               shasum: versions[version].dist.shasum,
               dev: false,
               tests: tests
@@ -85,7 +85,9 @@ if(!module.parent) {
       })
     }),
     pull.filter(Boolean),
-    pull.drain(console.log)
+    pull.drain(console.log, function (err) {
+      if(err) throw err
+    })
   )
 
   //TODO: package a directory and put it in the cache
