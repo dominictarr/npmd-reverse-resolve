@@ -57,10 +57,12 @@ if(!module.parent) {
     throw new Error('usage: npmd-reverse-resolve module version')
 
   var config = require('npmd-config')
+  //this is completely out of date.
   var db = require('level')(config.dbPath, {valueEncoding: 'json'})
   var cache  = require('npmd-cache')(db, config)
   var resolve = require('npmd-resolve')(null, cache, config)
-
+  /*
+  //this is how you use override, for now...
   config.override = {
     through: {
       name: 'through', version: '2.3.5',
@@ -68,7 +70,7 @@ if(!module.parent) {
       dependencies: {}
     }
   }
-
+  */
   pull(
     module.exports(),
     pull.filter(function (deps) {
